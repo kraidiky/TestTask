@@ -26,6 +26,7 @@ public class CubesOrderer : MonoBehaviour {
 				Size = box.transform.lossyScale.magnitude
 			});
 		if (newContainers.Count()>0) {
+			iTween.Stop();
 			// Посчитать сколько места все эти кубики вместе будут занимать на прямой линии. Каждый кубик имеет по краям ещё по 0.5 от своего диагонального размера
 			var newOrder = containers.Concat(newContainers).OrderBy(container=>container.Size); // Отсортируем по размерам
 			float total = newOrder.Select(container=>container.Size*1.1f).Sum();
@@ -35,7 +36,7 @@ public class CubesOrderer : MonoBehaviour {
 			foreach (var container in newOrder) {
 				pos += 0.55f*container.Size*transform.right;
 				container.SelectedPosition = pos; // Поставить кубик ан нужное место.
-				container.Box.transform.position = pos; // Это пока что расставляем.
+				iTween.MoveTo(container.Box.gameObject, iTween.Hash("x", pos.x, "y", pos.y, "z", pos.z, "easeType", iTween.EaseType.easeInOutExpo, "time", 1f));  // Сразу после назначения нового места кубик начинет лететь.
 				pos += 0.55f*container.Size*transform.right;
 			}
 			containers = newOrder.ToList(); // И закончили управжнения
@@ -53,11 +54,11 @@ public class CubesOrderer : MonoBehaviour {
 	void OnGUI ()
 	{
 		//GUI.Label (new Rect (10, 60, 100, 50), "Scores: ");
-		if (GUI.Button (new Rect (10, 10, 250, 24), "Создать новый случайный кубик")) {
-			CreateRandomBox();
-		}
-		if (GUI.Button (new Rect (10, 40, 200, 24), "Поискать новые кубики")) {
+		if (GUI.Button (new Rect (10, 10, 350, 24), "Поискать новые кубики на сцене и расставить")) {
 			InspectAndDecorateCubes ();
+		}
+		if (GUI.Button (new Rect (10, 40, 250, 24), "Создать новый случайный кубик")) {
+			CreateRandomBox();
 		}
 	}
 }
@@ -66,4 +67,5 @@ class CubeContainer {
 	public BoxCollider Box;
 	public float Size; // Размер наибольшей диагонали
 	public Vector3 SelectedPosition; // Сюда оно должно лететь
+	public iTween Tween;
 }
